@@ -2,7 +2,7 @@ import json
 
 import openai
 
-from config import OPEN_AI_KEY
+from config import OPEN_AI_KEY, logger
 
 
 class OpenAI:
@@ -21,10 +21,9 @@ class OpenAI:
         if isinstance(new_prompt_content, str):
             self._prompt_content = new_prompt_content
         else:
-            print('Incorrect data type')
+            logger.error('Incorrect data type %s', type(new_prompt_content))
 
     async def request_to_api(self, user_request: str) -> bool:
-        response = {}
         try:
             response = openai.ChatCompletion.create(
                 model=self.MODEL_ENGINE,
@@ -35,8 +34,7 @@ class OpenAI:
             )
             return response.choices[0].message['content'].strip()
         except Exception as e:
-            print("Error:", e)
-            print(response)
+            logger.error(e, exc_info=True)
             return False
 
     @staticmethod

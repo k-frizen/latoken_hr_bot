@@ -5,6 +5,9 @@ module to download vacancy information based on provided vacancy IDs.
 
 import asyncio
 from parse_hh_data import download
+from requests import HTTPError
+
+from bot_files.config import logger
 from bot_files.constants import EXTRACTED_VACANCIES_FIELDS
 
 
@@ -19,8 +22,8 @@ async def fetch_vacancy_info(_id: str) -> dict:
     try:
         assert _id.isnumeric()
         return download.vacancy(_id)
-    except AssertionError:
-        print('Incorrect vacancy id')
+    except (AssertionError, HTTPError):
+        logger.error('Incorrect vacancy id %s', _id, exc_info=True)
         return {}
 
 
@@ -41,5 +44,5 @@ async def process_vacancies(vacancies_data: dict):
         for field in EXTRACTED_VACANCIES_FIELDS:
             _vacancy[field] = vacancy_info.get(field, "Field not available")
         if not vacancy_info:
-            print('Error fetching data for vacancy: {}'.format(_vacancy['title']))
+            logger.error('Error fetching data for vacancy: %s', _vacancy['title'])
 
